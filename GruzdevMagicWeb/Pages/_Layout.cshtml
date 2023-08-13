@@ -1,0 +1,43 @@
+﻿
+@* -- Описание общего шаблона страниц -- *@
+
+@using GruzdevSweetPhrases.Pages
+@using GruzdevSweetPhrases.Services
+@model MasterModel
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>SweetPhrases</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="keywords" content="" />
+	<meta name="description" content="" />
+	<link href="~/css/default.css" rel="stylesheet" type="text/css" media="all" />
+	<link href="~/css/fonts.css" rel="stylesheet" type="text/css" media="all" />
+</head>
+
+<body>
+<div id="header-wrapper">
+	<div id="header" class="container">
+		<div id="logo">
+			<h1><span class="fa fa-bolt"></span><a href="Index">Sweet Phrases</a></h1>
+		</div>
+		<div id="menu">
+			<ul>
+				@foreach (PType ptype in Model.PTypes)
+        		{
+            		<li><a href="Section?id=@ptype.Id">@ptype.Name</a></li>
+        		}
+			</ul>
+		</div>
+	</div>
+</div>
+
+@RenderBody()
+
+<div id="copyright" class="container">
+	<p>All rights reserved.</p>
+</div>
+</body>
+</html>

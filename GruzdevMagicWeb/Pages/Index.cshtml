@@ -1,0 +1,134 @@
+﻿
+@* -- Описание главной страницы -- *@
+
+@page
+@using GruzdevSweetPhrases.Pages
+@using GruzdevSweetPhrases.Services
+@model GruzdevSweetPhrases.Pages.IndexModel
+@{
+    Layout = "~/Pages/_Layout.cshtml";
+}
+
+
+<div id="header-featured">
+	<div id="banner-wrapper">
+		<div id="banner" class="container">
+			<h2>У нас есть кое-что приятное для тебя</h2>
+			<div id="divCont">
+				<p>Просто напиши своё имя в поле ниже, нажми кнопку и узнай, какое напутствие лично тебя ждёт сегодня.</p>
+				<input type="text" id="txtUserName" placeholder="Ваше имя..." />
+    			<div id="errText">Введите нормальное имя, пожалуйста</div>
+    			<input type="button" id="btnSendName" class="button" value="Напутствие" />
+    		</div>
+    		<p id="lblResult"></p>
+		</div>
+	</div>
+</div>
+<div id="wrapper">
+	<div id="featured-wrapper">
+        <div id="featured" class="extra2 margin-btm container">
+            <div class="main-title">
+                <h2>Подборка разных фразочек</h2>
+                <span class="byline">Фразочки из разных категорий, написанные пользователями</span>
+            </div>
+
+            @for (int i = 0; i < Model.RightPhrases.Count; i++)
+            {
+                <div class="ebox1">
+                    <div class="title">
+                        <h2>@Model.LeftPhrases[i].Content</h2>
+                        <span class="byline">@Model.LeftPhrases[i].TypeName</span>
+                    </div>
+                    <div class="radioHome">
+                    	<p class="btnRate sub@(Model.LeftPhrases[i].Id.ToString())"><input type="radio" value="1" name="rate @Model.LeftPhrases[i].Id.ToString()"/></p>
+                    	<p class="btnRate sub@(Model.LeftPhrases[i].Id.ToString())"><input type="radio" value="2" name="rate @Model.LeftPhrases[i].Id.ToString()"/></p>
+                    	<p class="btnRate sub@(Model.LeftPhrases[i].Id.ToString())"><input type="radio" value="3" name="rate @Model.LeftPhrases[i].Id.ToString()"/></p>
+                    	<p class="btnRate sub@(Model.LeftPhrases[i].Id.ToString())"><input type="radio" value="4" name="rate @Model.LeftPhrases[i].Id.ToString()"/></p>
+                    	<p class="btnRate sub@(Model.LeftPhrases[i].Id.ToString())"><input type="radio" value="5" name="rate @Model.LeftPhrases[i].Id.ToString()"/></p>
+                    </div>
+                    <p class="sub@(Model.LeftPhrases[i].Id.ToString()) outputRate">Оценка: @(Math.Round(Model.LeftPhrases[i].Rate, 2).ToString()) (@(Model.LeftPhrases[i].Votes.ToString()))</p>
+                </div>
+                <div class="ebox2">
+                    <div class="title">
+                        <h2>@Model.RightPhrases[i].Content</h2>
+                        <span class="byline">@Model.RightPhrases[i].TypeName</span>
+                    </div>
+                    <div class="radioHome">
+                    	<p class="btnRate sub@(Model.RightPhrases[i].Id.ToString())"><input type="radio" value="1" name="rate @Model.RightPhrases[i].Id.ToString()"/></p>
+                    	<p class="btnRate sub@(Model.RightPhrases[i].Id.ToString())"><input type="radio" value="2" name="rate @Model.RightPhrases[i].Id.ToString()"/></p>
+                    	<p class="btnRate sub@(Model.RightPhrases[i].Id.ToString())"><input type="radio" value="3" name="rate @Model.RightPhrases[i].Id.ToString()"/></p>
+                    	<p class="btnRate sub@(Model.RightPhrases[i].Id.ToString())"><input type="radio" value="4" name="rate @Model.RightPhrases[i].Id.ToString()"/></p>
+                    	<p class="btnRate sub@(Model.RightPhrases[i].Id.ToString())"><input type="radio" value="5" name="rate @Model.RightPhrases[i].Id.ToString()"/></p>
+                    </div>
+                    <p class="sub@(Model.RightPhrases[i].Id.ToString()) outputRate">Оценка: @(Math.Round(Model.RightPhrases[i].Rate, 2).ToString()) (@(Model.RightPhrases[i].Votes.ToString()))</p>
+                </div>
+            }
+        </div>
+	</div>
+</div>
+
+<script>
+	const btnSendName = document.querySelector('#btnSendName'); // Кнопка
+	const divMain = document.querySelector('#divCont');			// Контейнер с формой
+	const txtRes = document.querySelector('#lblResult');		// Элемент для вывода результата
+
+	// Обработка получения напутствия при вводе имени и нажатии кнопки
+    btnSendName.addEventListener('click', () => {
+    	const txtField = document.querySelector('#txtUserName');
+        const user = txtField.value;
+        const err = document.querySelector('#errText');
+
+        if (user.length < 1){
+        	err.innerText = "В строку что-то ввести нужно обязательно!";
+        	err.style.visibility = "visible";
+        }
+        else if (user.length > 50){
+        	err.innerText = "Да ну, таких длинных имён не бывает!";
+        	err.style.visibility = "visible";
+        }
+        else if (user.match("^[A-Za-zА-Яа-я]+$")){
+        	fetch('/GetDayWish?user=' + user).then(r => r.json()).then(content => {
+        		txtRes.innerText = user + '\n' + content;
+        		divMain.style.display = "none";
+        		err.style.visibility = "hidden";
+        		txtField.value = '';
+        		txtRes.style.display = "block";
+        		txtRes.style.cursor = "pointer";
+        	});
+        }
+        else{
+        	err.innerText = "Допустимы только имена целиком на латинице или кириллице, без пробелов!";
+        	err.style.visibility = "visible";
+        }
+    });
+
+    // Возврат поля ввода и кнопки при нажатии на напутствие
+    txtRes.addEventListener('click', () => {
+    	txtRes.style.display = "none";
+    	divMain.style.display = "block";
+    });
+
+    // Обработка полей выставления оценок
+    [...document.querySelectorAll('.btnRate')].forEach(function(item) {
+        item.addEventListener('click', {
+            handleEvent(event) {
+                if (event.currentTarget.children[0].disabled == false)
+                {
+                    let cur_value = event.currentTarget.children[0].value;
+                    let sub_class = event.currentTarget.classList[1];
+                    
+                    fetch('/GetNewRate?mark=' + cur_value + '&id=' + sub_class.slice(3)).then(r => r.json()).then(rate => {
+                        let rating = document.querySelector('.' + sub_class + '.outputRate');
+                        let cnt = Number(rating.innerText.slice(rating.innerText.indexOf('(') + 1, rating.innerText.indexOf(')'))) + 1;
+                        rating.innerText = "Оценка: " + String(rate.toFixed(2)) + "(" + cnt + ")";
+                    });
+
+                    let cur_name = event.currentTarget.children[0].name;
+                    [...document.querySelectorAll('[name = "' + cur_name + '"]')].forEach(function(item) {
+                        item.disabled = true;
+                    });
+                }
+            }
+        });
+    });
+</script>

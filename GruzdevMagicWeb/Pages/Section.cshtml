@@ -1,0 +1,104 @@
+﻿
+@* -- Описание страницы раздела с фразами -- *@
+
+@page
+@using GruzdevSweetPhrases.Pages
+@using GruzdevSweetPhrases.Services
+@model GruzdevSweetPhrases.Pages.SectionModel
+@{
+    Layout = "~/Pages/_Layout.cshtml";
+}
+
+<div id="wrapper">
+	<div id="featured-wrapper">
+        <div id="featured" class="extra2 margin-btm container">
+            <div class="main-title">
+                <h2 class="txtRight">Раздел '@((Model.PTypes.Where(x => x.Id == Model.TID).ToList())[0].Name)'</h2>
+                <span class="byline"></span>
+            </div>
+
+            @for (int i = 0; i < Model.Phrases.Count; i++)
+            {
+            	@if (Model.Phrases[i].Type == Model.TID)
+            	{
+            		<div>
+                    	<div class="title">
+                        	<h2 class="txtRight Phrs">@Model.Phrases[i].Content</h2>
+                        	<span class="byline publine">Опубликовано: @(Model.Phrases[i].PubDate.ToString("d"))</span>
+
+                            <p class="sub@(Model.Phrases[i].Id.ToString()) outputRate rgt">Оценка: @(Math.Round(Model.Phrases[i].Rate, 2).ToString()) (@(Model.Phrases[i].Votes.ToString()))</p>
+
+                            <div class="radioHome rgt">
+                                <p class="btnRate sub@(Model.Phrases[i].Id.ToString())"><input type="radio" value="1" name="rate @Model.Phrases[i].Id.ToString()"/></p>
+                                <p class="btnRate sub@(Model.Phrases[i].Id.ToString())"><input type="radio" value="2" name="rate @Model.Phrases[i].Id.ToString()"/></p>
+                                <p class="btnRate sub@(Model.Phrases[i].Id.ToString())"><input type="radio" value="3" name="rate @Model.Phrases[i].Id.ToString()"/></p>
+                                <p class="btnRate sub@(Model.Phrases[i].Id.ToString())"><input type="radio" value="4" name="rate @Model.Phrases[i].Id.ToString()"/></p>
+                                <p class="btnRate sub@(Model.Phrases[i].Id.ToString())"><input type="radio" value="5" name="rate @Model.Phrases[i].Id.ToString()"/></p>
+                            </div>
+                    	</div>
+                	</div>
+            	}
+            }
+            <form action="/AddPhrase" method="get" id="formPhrase">
+                <textarea cols="80" rows="5" name="text" id="inputPhrase"></textarea>
+                <input type="hidden" name="id" value="@(Model.TID)" />
+                <input type="submit" class="button" value="Отправить" id="btnSendPhrase">
+            </form>
+            <div id="errText">Фраза должна содержать от 1 до 100 символов!</div>
+        </div>
+	</div>
+</div>
+
+<script>
+    // Обработка полей выставления оценок
+    [...document.querySelectorAll('.btnRate')].forEach(function(item) {
+        item.addEventListener('click', {
+            handleEvent(event) {
+                if (event.currentTarget.children[0].disabled == false)
+                {
+                    let cur_value = event.currentTarget.children[0].value;
+                    let sub_class = event.currentTarget.classList[1];
+                    
+                    fetch('/GetNewRate?mark=' + cur_value + '&id=' + sub_class.slice(3)).then(r => r.json()).then(rate => {
+                        let rating = document.querySelector('.' + sub_class + '.outputRate');
+                        let cnt = Number(rating.innerText.slice(rating.innerText.indexOf('(') + 1, rating.innerText.indexOf(')'))) + 1;
+                        rating.innerText = "Оценка: " + String(rate.toFixed(2)) + "(" + cnt + ")";
+                    });
+
+                    let cur_name = event.currentTarget.children[0].name;
+                    [...document.querySelectorAll('[name = "' + cur_name + '"]')].forEach(function(item) {
+                        item.disabled = true;
+                    });
+                }
+            }
+        });
+    });
+
+    // Элемент страницы для вывода ошибки
+    const err = document.querySelector('#errText');
+
+    // Обработка отправки формы с новой фразой на сервер
+    function checkForm(e) {
+        let text = document.querySelector('#inputPhrase').value;
+        if (text.length < 1 || text.length > 100)
+        {
+            err.innerText = "Фраза должна содержать от 1 до 100 символов!";
+            err.style.visibility = "visible";
+            e.preventDefault();
+        }
+        else
+        {
+            let phrases = [...document.querySelectorAll('.Phrs')]
+            for (let i = 0; i < phrases.length; i++){
+                if (phrases[i].innerText == text){
+                    err.innerText = "Такая фраза уже есть!";
+                    err.style.visibility = "visible";
+                    e.preventDefault();
+                    break
+                    return;
+                }
+            }
+        }
+    }    
+    document.querySelector('#formPhrase').addEventListener('submit', checkForm);
+</script>
