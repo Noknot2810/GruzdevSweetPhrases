@@ -1,7 +1,11 @@
 USE [master]
 GO
 
-DROP DATABASE IF EXISTS [GruzdevSweetPhrases]
+IF DB_ID (N'GruzdevSweetPhrases') IS NOT NULL
+BEGIN
+    ALTER DATABASE [GruzdevSweetPhrases] SET SINGLE_USER WITH ROLLBACK IMMEDIATE
+    DROP DATABASE [GruzdevSweetPhrases]
+END
 GO
 
 CREATE DATABASE [GruzdevSweetPhrases]
@@ -21,11 +25,11 @@ CREATE TABLE TypePhrase
 CREATE TABLE Phrases  
 (
     IDp INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_Ph PRIMARY KEY,  
-	Content NVARCHAR(255) NOT NULL,
-	PDate DATE NOT NULL,
-	Rate FLOAT NOT NULL,
-	Votes INT NOT NULL,
-	TypeID INT NOT NULL
+    Content NVARCHAR(255) NOT NULL,
+    PDate DATE NOT NULL,
+    Rate FLOAT NOT NULL,
+    Votes INT NOT NULL,
+    TypeID INT NOT NULL
 )
 
 ALTER TABLE Phrases ADD CONSTRAINT f1 FOREIGN KEY(TypeID) REFERENCES TypePhrase(IDt)
@@ -34,9 +38,9 @@ ALTER TABLE Phrases ADD CONSTRAINT f1 FOREIGN KEY(TypeID) REFERENCES TypePhrase(
 CREATE TABLE DayPhrase  
 (
     IDd INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_Day PRIMARY KEY,  
-	Name NVARCHAR(255) NOT NULL,
-	Day DATE NOT NULL UNIQUE,
-	PhraseID INT NOT NULL
+    Name NVARCHAR(255) NOT NULL,
+    Day DATE NOT NULL,
+    PhraseID INT NOT NULL
 )
 
 ALTER TABLE DayPhrase ADD CONSTRAINT f2 FOREIGN KEY(PhraseID) REFERENCES Phrases(IDp)
@@ -45,22 +49,22 @@ ALTER TABLE DayPhrase ADD CONSTRAINT f2 FOREIGN KEY(PhraseID) REFERENCES Phrases
 INSERT TypePhrase (TypeName)  
 VALUES ('Напутствия'),
        ('Похвала'),
-	   ('Глупости')
+       ('Глупости')
 
 INSERT Phrases (Content, PDate, Rate, Votes, TypeID)  
 VALUES ('Пусть у тебя будет много свободного времени.', GETDATE(), 0, 0, 1),
        ('Пусть тебе всегда будут сниться интересные сны.', GETDATE(), 0, 0, 1),
-	   ('Пусть твоя зарплата будет больше 50 тысяч.', GETDATE(), 0, 0, 1),
-	   ('Ты будешь успешен, я точно знаю.', GETDATE(), 0, 0, 1),
-	   ('Следуй за белым кроликом.', GETDATE(), 0, 0, 1),
-	   ('Не занудствуй.', GETDATE(), 0, 0, 1),
-	   ('Береги здоровье, делай зарядку.', GETDATE(), 0, 0, 1),
-	   ('Ты - красавчег!', GETDATE(), 0, 0, 2),
-	   ('Никого не слушай, ты лучше всех.', GETDATE(), 0, 0, 2),
-	   ('Как ты только всё успеваешь?!', GETDATE(), 0, 0, 2),
-	   ('Арам-зам-зам, арам-зам-зам', GETDATE(), 0, 0, 3),
-	   ('Чек, пожалуйста!', GETDATE(), 0, 0, 3),
-	   ('Апчхи!!!', GETDATE(), 0, 0, 3)
+       ('Пусть твоя зарплата будет больше 50 тысяч.', GETDATE(), 0, 0, 1),
+       ('Ты будешь успешен, я точно знаю.', GETDATE(), 0, 0, 1),
+       ('Следуй за белым кроликом.', GETDATE(), 0, 0, 1),
+       ('Не занудствуй.', GETDATE(), 0, 0, 1),
+       ('Береги здоровье, делай зарядку.', GETDATE(), 0, 0, 1),
+       ('Ты - красавчег!', GETDATE(), 0, 0, 2),
+       ('Никого не слушай, ты лучше всех.', GETDATE(), 0, 0, 2),
+       ('Как ты только всё успеваешь?!', GETDATE(), 0, 0, 2),
+       ('Арам-зам-зам, арам-зам-зам', GETDATE(), 0, 0, 3),
+       ('Чек, пожалуйста!', GETDATE(), 0, 0, 3),
+       ('Апчхи!!!', GETDATE(), 0, 0, 3)
 
 GO
 
@@ -78,7 +82,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	INSERT INTO DayPhrase 
+    INSERT INTO DayPhrase 
     SELECT Name, Day, (SELECT TOP 1 IDp FROM Phrases WHERE TypeID = 1 ORDER BY NEWID())
     FROM inserted
 END
